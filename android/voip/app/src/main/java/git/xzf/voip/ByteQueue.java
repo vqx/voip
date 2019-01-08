@@ -36,4 +36,17 @@ public class ByteQueue {
         }
         return new byte[0];
     }
+
+    public void Clear() {
+        try {
+            lock.lock();
+            for (int i = 0; i < queue.size(); i++) {
+                queue.remove(0);
+            }
+            lock.unlock();
+        } catch (Exception e) {
+            Log.P("ByteQueue.Out", e.toString());
+        }
+
+    }
 }

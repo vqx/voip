@@ -4,43 +4,56 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 
-import java.io.BufferedReader;
-import java.io.PrintWriter;
-import java.net.Socket;
+import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
-    Socket socket;
-    PrintWriter out = null;
-    BufferedReader in = null;
+    Audio audio;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final EditText addressView = findViewById(R.id.AddressView);
-        final String address = addressView.getText().toString();
-        Button sendBut = findViewById(R.id.SendBut);
-        final EditText sendTextView = findViewById(R.id.SendTextView);
-        final TextView showTextView = findViewById(R.id.ShowTextView);
-        final String sendText = sendTextView.getText().toString();
-
-        sendBut.setOnClickListener(new View.OnClickListener() {
+        Button dailBut = findViewById(R.id.DailBut);
+        Button stopBut = findViewById(R.id.StopBut);
+        final TextView userNameView = findViewById(R.id.UserNameView);
+        String tmpUserName = "";
+        for (int i = 0; i < 6; i++) {
+            tmpUserName += new Random().nextInt(10) + "";
+        }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Log.P("init Audio ");
+                Log.P("init Audio success");
+            }
+        }).start();
+        userNameView.setText(tmpUserName);
+        dailBut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.P("onClick sendBut");
+                Log.P("onClick dailBut");
+                String userName = userNameView.getText().toString();
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
                         try {
-                            new Audio().Record();
+                            audio = new Audio();
+                            audio.Record();
                         } catch (Exception e) {
                             Log.P("onClick Audio new " + e);
                         }
                     }
                 }).start();
+            }
+        });
+        stopBut.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.P("onClick stopBut");
+                audio.StopRecord();
             }
         });
     }

@@ -31,14 +31,14 @@ public class Audio {
                 AudioFormat.ENCODING_PCM_16BIT,
                 BufferElements2Rec * BytesPerElement,
                 AudioTrack.MODE_STREAM);
-        // tcpClient = new TcpClient(Config.Address, Config.Port);
+         tcpClient = new TcpClient(Config.Address, Config.Port);
+        tcpClient.Connect();
     }
 
     boolean recording;
 
-    public void Record() throws Exception {
+    public void Record() {
         Log.P("enter");
-        // tcpClient.Connect();
         record.startRecording();
         recording = true;
         new Thread(new Runnable() {
@@ -48,10 +48,23 @@ public class Audio {
                 while (recording) {
                     byte sData[] = new byte[BufferElements2Rec];
                     record.read(sData, 0, BufferElements2Rec);
-                    queue.In(sData);
-                    //  tcpClient.Send(sData);
-
+                    //queue.In(sData);
+                    tcpClient.Send(sData);
                 }
+                Log.P("record thread stop");
+            }
+        }).start();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Log.P("start get thread");
+                while (recording) {
+                    byte[] tmp =  tcpClient.Get(BufferElements2Rec);
+                    if (tmp.length == BufferElements2Rec) {
+                        queue.In(tmp);
+                    }
+                }
+                Log.P("Get thread stop");
             }
         }).start();
         new Thread(new Runnable() {
@@ -65,6 +78,7 @@ public class Audio {
                         audioTrack.play();
                     }
                 }
+                Log.P("play thread stop");
             }
         }).start();
         Log.P("end run Thread");
@@ -73,8 +87,11 @@ public class Audio {
     public void StopRecord() {
         if (null != record) {
             recording = false;
+            audioTrack.stop();
+            audioTrack.release();
             record.stop();
             record.release();
+            queue.Clear();
         }
     }
 }
