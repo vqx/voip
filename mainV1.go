@@ -10,7 +10,7 @@ import (
 func main() {
 	addr := &net.UDPAddr{
 		Port: 8888,
-		IP:   net.ParseIP("10.1.0.54"),
+		IP:   net.ParseIP("0.0.0.0"),
 	}
 	server := xudp.NewServer(addr, func(req xudp.HandleRequest) {
 		index := strings.Index(req.Data, "|")
